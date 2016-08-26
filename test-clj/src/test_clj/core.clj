@@ -2,8 +2,6 @@
   (:gen-class))
 
 
-
-
 (defn- make-row
   ([nb] (make-row nb 0))
   ([nb init]
@@ -68,18 +66,36 @@
 
 (defn step-grid
   [grid]
-  (reduce (stepCell grid) grid (for [y (range 0 (.length grid))
-                                     x (range 0 (.length (nth grid 0)))]
+  (reduce (stepCell grid) grid (for [ y (range 0 (.length grid))
+                                      x (range 0 (.length (nth grid 0)))]
                                     [x y])))
 
+(defn stateLoop
+  [grid continue?]
+  (loop [ gr grid]
+    (do
+      (display-grid gr)
+      (newline)
+      (if (continue?)
+        (recur (step-grid gr))
+        nil))))
+
+(defn countfunc 
+  [number]
+  (let [counter (atom number)]
+    (fn [] (do (swap! counter dec) (> @counter 0)))))
+
+
 (defn -main
- "I don't do a whole lot ... yet."
- [& args]
- (loop [gr (-> (make-grid 15 15) (initGrid '([6 6] [6 7] [6 8])))
-        count 10]
-  (do
-    (display-grid gr)
-    (newline)
-    (if (> count 0)
-      (recur (step-grid gr) (dec count))
-      nil))))
+  "I don't do a whole lot ... yet."
+  [& args]
+  (do 
+    (println args)
+    (let [w (load-string (first args))
+          h (load-string (second args))
+          c (load-string (nth args 2))
+          startPoints (load-string (last args))]
+      (stateLoop  (-> (make-grid w h) 
+                      (initGrid startPoints))
+                  (countfunc c)))))
+  
